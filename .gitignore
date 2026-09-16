@@ -27,3 +27,7 @@ dist/build
 *.njsproj
 *.sln
 *.sw?
+# backend
+backend/node_modules
+backend/uploads/*
+!backend/uploads/.gitkeep
