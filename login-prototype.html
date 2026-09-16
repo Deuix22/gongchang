@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>微信小程序登录页面原型</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            flex-wrap: wrap;
+        }
+
+        /* 手机预览区域 */
+        .phone-preview {
+            flex: 1;
+            min-width: 375px;
+            max-width: 375px;
+            background: #000;
+            border-radius: 30px;
+            padding: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .phone-screen {
+            background: #fff;
+            border-radius: 25px;
+            overflow: hidden;
+            height: 812px;
+            position: relative;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            height: 44px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        /* 页面内容 */
+        .login-content {
+            height: calc(100% - 44px);
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 60px 30px 40px;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        /* Logo区域 */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .logo-circle {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+            border-radius: 25px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(7, 193, 96, 0.3);
+        }
+
+        .logo-circle::before {
+            content: "微";
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .app-name {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .app-slogan {
+            font-size: 14px;
+            color: #8c8c8c;
+        }
+
+        /* 登录按钮区域 */
+        .login-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .wechat-login-btn {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(7, 193, 96, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wechat-login-btn::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .wechat-login-btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .wechat-login-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(7, 193, 96, 0.3);
+        }
+
+        .wechat-icon {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .login-tips {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+            line-height: 1.6;
+        }
+
+        /* 装饰元素 */
+        .decoration {
+            position: absolute;
+            opacity: 0.05;
+        }
+
+        .decoration-1 {
+            width: 200px;
+            height: 200px;
+            background: #07c160;
+            border-radius: 50%;
+            top: -100px;
+            right: -100px;
+        }
+
+        .decoration-2 {
+            width: 150px;
+            height: 150px;
+            background: #07c160;
+            border-radius: 50%;
+            bottom: -75px;
+            left: -75px;
+        }
+
+        /* 设计说明区域 */
+        .design-specs {
+            flex: 1;
+            min-width: 400px;
+            padding: 20px;
+        }
+
+        .specs-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #07c160;
+        }
+
+        .spec-section {
+            margin-bottom: 25px;
+        }
+
+        .spec-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #07c160;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spec-section-title::before {
+            content: "▸";
+            font-size: 12px;
+        }
+
+        .spec-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #07c160;
+        }
+
+        .spec-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .spec-list li {
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .spec-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #07c160;
+            font-weight: bold;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .color-item {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .color-primary {
+            background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+        }
+
+        .color-secondary {
+            background: #1a1a1a;
+        }
+
+        .color-text {
+            background: #666;
+        }
+
+        .color-bg {
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .phone-preview {
+                max-width: 100%;
+            }
+
+            .design-specs {
+                min-width: 100%;
+            }
+        }
+
+        /* 点击反馈 */
+        .click-feedback {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 手机预览区域 -->
+        <div class="phone-preview">
+            <div class="phone-screen">
+                <!-- 状态栏 -->
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>📶 📶 🔋 100%</span>
+                </div>
+
+                <!-- 登录页面内容 -->
+                <div class="login-content">
+                    <!-- 装饰元素 -->
+                    <div class="decoration decoration-1"></div>
+                    <div class="decoration decoration-2"></div>
+
+                    <!-- Logo区域 -->
+                    <div class="logo-section">
+                        <div class="logo-circle"></div>
+                        <div class="app-name">小程序名称</div>
+                        <div class="app-slogan">欢迎使用，请先登录</div>
+                    </div>
+
+                    <!-- 登录按钮区域 -->
+                    <div class="login-section">
+                        <button class="wechat-login-btn" id="loginBtn">
+                            <div class="wechat-icon">💬</div>
+                            <span>微信快捷登录</span>
+                        </button>
+                        <div class="login-tips">
+                            点击登录即表示同意<br>
+                            《用户协议》和《隐私政策》
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设计说明区域 -->
+        <div class="design-specs">
+            <h2 class="specs-title">设计说明</h2>
+
+            <div class="spec-section">
+                <div class="spec-section-title">设计理念</div>
+                <div class="spec-content">
+                    采用简洁现代的设计风格，以微信品牌绿色为主色调，营造清新、信任的视觉感受。页面布局遵循移动端最佳实践，确保用户能够快速理解并完成登录操作。
+                </div>
+            </div>
+
+            <div class="spec-section">
+                <div class="spec-section-title">视觉规范</div>
+                <div class="spec-content">
+                    <div class="color-palette">
+                        <div class="color-item color-primary">
+                            <div>主色</div>
+                            <div style="font-size: 10px; margin-top: 4px;">#07c160</div>
+                        </div>
+                        <div class="color-item color-secondary">
+                            <div>文字</div>
+                            <div style="font-size: 10px; margin-top: 4px;">#1a1a1a</div>
+                        </div>
+                        <div class="color-item color-text">
+                            <div>辅助</div>
+                            <div style="font-size: 10px; margin-top: 4px;">#666</div>
+                        </div>
+                        <div class="color-item color-bg">
+                            <div>背景</div>
+                            <div style="font-size: 10px; margin-top: 4px;">#f8f9fa</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="spec-section">
+                <div class="spec-section-title">交互设计</div>
+                <div class="spec-content">
+                    <ul class="spec-list">
+                        <li>按钮点击有缩放反馈效果（scale 0.98）</li>
+                        <li>点击时产生涟漪动画效果</li>
+                        <li>按钮阴影在点击时减弱，增强按压感</li>
+                        <li>页面元素采用渐入动画，提升视觉体验</li>
+                        <li>登录按钮使用渐变背景，增强视觉吸引力</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="spec-section">
+                <div class="spec-section-title">布局结构</div>
+                <div class="spec-content">
+                    <ul class="spec-list">
+                        <li>状态栏高度：44px（iOS标准）</li>
+                        <li>Logo区域：顶部居中，包含品牌标识和应用名称</li>
+                        <li>登录区域：底部对齐，包含登录按钮和协议提示</li>
+                        <li>页面高度：812px（iPhone X系列标准）</li>
+                        <li>内边距：左右30px，上下自适应</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="spec-section">
+                <div class="spec-section-title">功能说明</div>
+                <div class="spec-content">
+                    <ul class="spec-list">
+                        <li>微信快捷登录：一键调用微信授权登录</li>
+                        <li>协议提示：底部显示用户协议和隐私政策链接</li>
+                        <li>响应式设计：适配不同屏幕尺寸</li>
+                        <li>交互反馈：所有可点击元素都有明确的视觉反馈</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="spec-section">
+                <div class="spec-section-title">技术实现</div>
+                <div class="spec-content">
+                    <ul class="spec-list">
+                        <li>使用CSS3渐变和阴影实现现代视觉效果</li>
+                        <li>采用Flexbox布局确保响应式适配</li>
+                        <li>使用CSS动画增强交互体验</li>
+                        <li>按钮使用伪元素实现涟漪点击效果</li>
+                        <li>移动端视口设置，确保正确显示</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 登录按钮点击交互
+        const loginBtn = document.getElementById('loginBtn');
+        
+        loginBtn.addEventListener('click', function(e) {
+            // 创建涟漪效果
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            
+            this.appendChild(ripple);
+            
+            // 模拟登录流程
+            setTimeout(() => {
+                alert('正在调用微信登录...\n\n（这是原型演示，实际开发中会调用微信授权API）');
+                ripple.remove();
+            }, 300);
+        });
+
+        // 添加触摸反馈（移动端）
+        loginBtn.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.98)';
+        });
+
+        loginBtn.addEventListener('touchend', function() {
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "首页",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationBarTitleText": "登录",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/preview/experience",
+			"style": {
+				"navigationBarTitleText": "功能体验",
+				"navigationStyle": "default",
+				"navigationBarBackgroundColor": "#FFFFFF",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/team/management",
+			"style": {
+				"navigationBarTitleText": "组员管理",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/attendance/stats",
+			"style": {
+				"navigationBarTitleText": "出勤时间统计",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/user/management",
+			"style": {
+				"navigationBarTitleText": "用户管理",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/agreement/user",
+			"style": {
+				"navigationBarTitleText": "用户协议",
+				"navigationStyle": "default"
+			}
+		},
+		{
+			"path": "pages/agreement/privacy",
+			"style": {
+				"navigationBarTitleText": "隐私政策",
+				"navigationStyle": "default"
+			}
+		}
+	],
+	"subPackages": [
+		{
+			"root": "pages/settings",
+			"pages": [
+				{
+					"path": "index",
+					"style": {
+						"navigationBarTitleText": "设置",
+						"navigationStyle": "custom"
+					}
+				}
+			],
+			"independent": true
+		},
+		{
+			"root": "pages/query",
+			"pages": [
+				{
+					"path": "index",
+					"style": {
+						"navigationBarTitleText": "数据查询",
+						"navigationStyle": "custom"
+					}
+				}
+			]
+		},
+		{
+			"root": "pages/performance",
+			"pages": [
+				{
+					"path": "index",
+					"style": {
+						"navigationBarTitleText": "绩效系统",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "worktime",
+					"style": {
+						"navigationBarTitleText": "工时统计",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "abnormal",
+					"style": {
+						"navigationBarTitleText": "异常工时流程",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "capacity",
+					"style": {
+						"navigationBarTitleText": "产能提报",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "capacity-manage",
+					"style": {
+						"navigationBarTitleText": "产能管理",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "capacity-config",
+					"style": {
+						"navigationBarTitleText": "产能基础数据维护",
+						"navigationStyle": "custom"
+					}
+				}
+			]
+		},
+		{
+			"root": "pages/warehouse",
+			"pages": [
+				{
+					"path": "index",
+					"style": {
+						"navigationBarTitleText": "仓储系统",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "shipment-entry",
+					"style": {
+						"navigationBarTitleText": "录入出货单",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "scan-compare",
+					"style": {
+						"navigationBarTitleText": "出货比对",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "manage-query",
+					"style": {
+						"navigationBarTitleText": "管理查询",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "inventory",
+					"style": {
+						"navigationBarTitleText": "物料库存管理",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "inventory-inbound",
+					"style": {
+						"navigationBarTitleText": "物料入库",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "inventory-stock",
+					"style": {
+						"navigationBarTitleText": "库存查询",
+						"navigationStyle": "custom"
+					}
+				}
+			]
+		},
+		{
+			"root": "pages/deli",
+			"pages": [
+				{
+					"path": "index",
+					"style": {
+						"navigationBarTitleText": "得力数据",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "org",
+					"style": {
+						"navigationBarTitleText": "人员与部门",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "attendance/index",
+					"style": {
+						"navigationBarTitleText": "考勤数据",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "attendance/daily",
+					"style": {
+						"navigationBarTitleText": "每日统计",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "attendance/abnormal",
+					"style": {
+						"navigationBarTitleText": "异常考勤",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "attendance/monthly",
+					"style": {
+						"navigationBarTitleText": "月度汇总",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "attendance/dept",
+					"style": {
+						"navigationBarTitleText": "部门统计",
+						"navigationStyle": "custom"
+					}
+				}
+			]
+		}
+	],
+	"preloadRule": {
+		"pages/index/index": {
+			"network": "wifi",
+			"packages": ["pages/performance"]
+		}
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	}
+}

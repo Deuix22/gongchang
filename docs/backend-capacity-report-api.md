@@ -1,0 +1,246 @@
+# 产能提报 - 后端对接文档
+
+## 一、功能说明
+
+绩效系统「产能提报」用于录入产线产能数据。用户填写产线、批次号、型号、生产工序、产出数及生产开始/结束时间，前端会计算**生产时长**、**UPH**（Units Per Hour，产出数/生产时长小时数）、**产出工时**等信息，提交时由前端将表单数据及时间范围提交给后端保存。
+
+后端需提供：
+
+1. **产能提报提交接口**（`POST`，单条提交）。
+2. **产能列表查询接口**（`GET`，供「产能管理」页筛选、列表展示与导出使用，仅管理员/admin 可见）。
+
+---
+
+## 二、提交接口：产能提报
+
+### 2.1 基本信息
+
+| 项目 | 说明 |
+|------|------|
+| 接口路径 | `POST /api/performance/capacity`（或由后端统一前缀，如 `/api/performance/capacity/submit`） |
+| 请求头 | `Content-Type: application/json`，需携带 `Authorization: Bearer <token>` |
+| 说明 | 提交一条产能提报记录 |
+
+### 2.2 请求体（Body）
+
+前端提交的 JSON 字段与类型如下，**核心字段为必填**（前端提交前已做校验）。
+
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| productionLine | string | 是 | 产线，取值见下方「产线枚举」 |
+| batchNo | string | 是 | 批次号 |
+| model | string | 是 | 型号 |
+| process | string | 是 | 生产工序 |
+| passQuantity | number | 是 | 产出数（原字段名沿用 `passQuantity`），非负整数 |
+| attendanceHours | number | 否 | 出勤工时，单位：小时，非负数，可为小数 |
+| outputHours | number | 否 | 产出工时，单位：小时，非负数，可为小数，前端默认按「单台工时 × 产出数」计算 |
+| startDate | string | 是 | 生产开始日期，格式 `YYYY-MM-DD` |
+| startTime | string | 是 | 生产开始时间，格式 `HH:mm` 或 `HH:mm:ss` |
+| endDate | string | 是 | 生产结束日期，格式 `YYYY-MM-DD` |
+| endTime | string | 是 | 生产结束时间，格式 `HH:mm` 或 `HH:mm:ss` |
+
+**线体（productionLine）**  
+须为 **`GET /api/performance/capacity/meta` 返回的 `lines` 数组中的任一项**（与 admin「产能基础数据维护」一致）。  
+不得写死 DIP1～DIP7；仅当 meta 未配置任何线体时，可回退默认 DIP1线～DIP7线。  
+完整后端配合说明见 `docs/backend-capacity-frontend-changes-checklist.md`。
+
+**请求示例**：
+
+```json
+{
+  "productionLine": "DIP1线",
+  "batchNo": "BATCH20240115001",
+  "model": "MX-2000",
+  "process": "插件",
+  "passQuantity": 1200,
+  "attendanceHours": 10.5,
+  "outputHours": 1800,
+  "startDate": "2024-01-15",
+  "startTime": "08:00",
+  "endDate": "2024-01-15",
+  "endTime": "12:30"
+}
+```
+
+说明：  
+- `passQuantity` 在前端页面文案中展示为「产出数」，以字符串输入，提交时需转为 **number** 再传给后端。  
+- `attendanceHours`、`outputHours` 如填写，前端会转为数字传给后端；若留空可不传或置为 0，由后端按业务需要处理。  
+- 生产开始、结束时间由 `startDate + startTime`、`endDate + endTime` 组成，后端可按需转为时间戳或 datetime 存储。
+
+### 2.3 后端校验建议
+
+除通用鉴权外，建议后端至少做以下校验：
+
+1. **必填**：核心 9 个字段（productionLine、batchNo、model、process、passQuantity、startDate、startTime、endDate、endTime）均存在且非空（字符串去首尾空格后非空）。
+2. **线体**：`productionLine` 必须在 meta `lines` 集合内（与 `/capacity/lines` 返回一致）。
+3. **产出数**：`passQuantity` 为数字且 `>= 0`（可为 0）。
+4. **出勤工时**：如提供 `attendanceHours`，需为数字且 `>= 0`。
+5. **产出工时**：如提供 `outputHours`，需为数字且 `>= 0`；也可以由后端根据单台工时和产出数重新计算并覆盖前端值。
+6. **时间逻辑**：  
+   `endDate + endTime` 形成的结束时间必须 **晚于** `startDate + startTime` 形成的开始时间。  
+   若使用日期+时间字符串解析，建议统一时区（如业务所在时区或 UTC）。
+
+可选校验（按业务需要）：  
+- 开始/结束日期不能为未来日期；  
+- 批次号、型号、工序长度或格式限制。
+
+### 2.4 成功响应
+
+**HTTP 状态码**：`200 OK`
+
+**响应体**：建议与项目现有规范统一，例如：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "capacity_record_001",
+    "productionLine": "DIP1线",
+    "batchNo": "BATCH20240115001",
+    "model": "MX-2000",
+    "process": "插件",
+    "passQuantity": 1200,
+    "startDate": "2024-01-15",
+    "startTime": "08:00",
+    "endDate": "2024-01-15",
+    "endTime": "12:30",
+    "createdAt": "2024-01-15T04:35:00.000Z"
+  }
+}
+```
+
+或仅返回 id + 成功标识，由后端约定即可。前端当前仅根据 **2xx** 和未报错视为成功，成功后跳转绩效首页。
+
+### 2.5 错误响应
+
+**HTTP 状态码**：`400`（参数错误）、`401`（未登录）、`403`（无权限）、`500`（服务器错误）等。
+
+**响应体**：与项目统一错误格式一致，例如：
+
+```json
+{
+  "error": {
+    "code": "INVALID_PARAMS",
+    "message": "结束时间必须晚于开始时间",
+    "details": {}
+  }
+}
+```
+
+前端会用 `message` 或等价字段做 Toast 提示；若有字段级错误，可放在 `details` 中，前端可按需解析。
+
+---
+
+## 三、业务规则说明（供后端实现参考）
+
+### 3.1 生产时长
+
+- **定义**：生产时长 = 结束时间 − 开始时间。  
+- **单位**：前端展示为「X小时Y分钟」，后端存储建议以**分钟**或**秒**存一份，便于统计与报表。  
+- **计算**：可由后端根据 `startDate/startTime`、`endDate/endTime` 自行计算并落库，无需前端传「生产时长」字段。
+
+### 3.2 UPH（Units Per Hour）
+
+- **公式**：`UPH = 产出数(passQuantity) / 生产时长(小时)`。  
+- **说明**：前端仅用于页面展示，当前**不会**在提交 body 里传 UPH；若后端需要留痕，可由后端在接收 `passQuantity` 和开始/结束时间后自行计算并写入数据库。
+
+### 3.3 产线枚举
+
+当前前端固定为：  
+`DIP1线`、`DIP2线`、`DIP3线`、`DIP4线`、`DIP5线`、`DIP6线`、`DIP7线`。  
+
+若后续产线由后端配置，可再增加「产线列表」查询接口，前端改为下拉从接口拉取；当前对接只需按上述枚举校验即可。
+
+---
+
+## 四、前端调用说明
+
+- **触发时机**：用户在产能提报页点击「提交」且前端校验通过后。  
+- **请求**：`POST`，Body 为上述 JSON，`passQuantity` 已转为 number。  
+- **成功**：前端提示「提交成功」，约 1.5 秒后 `redirectTo` 绩效首页。  
+- **失败**：根据接口返回的错误信息 Toast 提示，不跳转。
+
+前端在对接前通过 `console.log('产能提报数据:', form)` 打出提交数据结构，后端可直接按该结构约定字段名与类型；若后端字段名不同（如 snake_case），可在前端封装一层转换，或在本文档中注明映射关系便于联调。
+
+---
+
+## 五、产能列表查询接口（产能管理页）
+
+「产能管理」页仅管理员权限和 admin 用户可见，用于按线体、制程段、机型、组长、提交人、负责人及提报日期范围筛选产能记录，并支持表格导出（按时段展开）。
+
+### 5.1 基本信息
+
+| 项目 | 说明 |
+|------|------|
+| 接口路径 | `GET /api/performance/capacity` |
+| 请求头 | 需携带 `Authorization: Bearer <token>` |
+| 说明 | 分页 + 筛选查询产能记录列表 |
+
+### 5.2 查询参数（Query）
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| productionLine | string | 否 | 线体 |
+| processSegment | string | 否 | 制程段（可与旧字段 process 兼容） |
+| machineModel | string | 否 | 机型关键字（模糊，可与旧字段 model 兼容） |
+| teamLeader | string | 否 | 组长关键字（模糊） |
+| submitter | string | 否 | 提交人关键字（模糊） |
+| personInCharge | string | 否 | 负责人关键字（模糊） |
+| reportDate | string | 否 | 提报日期 YYYY-MM-DD（精确） |
+| startDate | string | 否 | 提报开始日期 YYYY-MM-DD |
+| endDate | string | 否 | 提报结束日期 YYYY-MM-DD |
+| page | number | 否 | 页码，默认 1 |
+| pageSize | number | 否 | 每页条数，默认 20 |
+
+### 5.3 成功响应
+
+**HTTP 状态码**：`200 OK`
+
+**响应体**：建议与项目统一格式一致，例如：
+
+```json
+{
+  "list": [
+    {
+      "id": "capacity_record_001",
+      "reportDate": "2024-01-15",
+      "productionLine": "DIP1线",
+      "teamLeader": "张三",
+      "processSegment": "插件",
+      "machineModel": "MX-2000",
+      "personInCharge": "李四",
+      "submitter": "王五",
+      "reasonRemark": "",
+      "timeSlots": [
+        {
+          "timeRange": "08:00-10:00",
+          "productionMinutes": 120,
+          "productionHours": 2,
+          "standardCapacity": 100,
+          "actualCapacity": 95,
+          "standardManpower": 5,
+          "actualManpower": 5
+        }
+      ],
+      "createdAt": "2024-01-15T04:35:00.000Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+若后端暂不支持关键字模糊或日期范围，可先返回全部列表（或按时间倒序分页），前端会对当前结果做二次筛选与分页。
+
+---
+
+## 六、小结
+
+| 项目 | 内容 |
+|------|------|
+| 需提供的接口 | `POST /api/performance/capacity`（提交）、`GET /api/performance/capacity`（列表查询） |
+| 提交请求体 | 核心字段：productionLine、batchNo、model、process、passQuantity（产出数）、startDate、startTime、endDate、endTime；扩展字段：attendanceHours、outputHours |
+| 产线枚举 | DIP1线～DIP7线 |
+| 可选后端计算 | 生产时长、UPH，由后端根据开始/结束时间与 passQuantity 计算并落库 |
+| 前端成功行为 | 提交成功后跳转绩效首页；产能管理页支持筛选与导出 |
+
+如有环境、域名、统一前缀或错误码规范差异，以实际后端约定为准，本文档可再按约定做一次同步更新。
